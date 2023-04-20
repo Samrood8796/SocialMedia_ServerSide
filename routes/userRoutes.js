@@ -2,7 +2,7 @@ import express from 'express';
 import upload from '../config/multer.js';
 import { verifyToken } from '../middleware/verifyToken.js'
 
-import { updatePost, getPost, addPost, fetchPostFollowing, deletePost, commentPost,fetchPosts,fetchAllPosts } from '../controllers/postController.js'
+import { updatePost, getPost, addPost, fetchPostFollowing, deletePost, commentPost,fetchPosts,fetchAllPosts, reportPost } from '../controllers/postController.js'
 import { register, login, verifyEmail, resetPassword, forgotPassword,googleLogin } from '../controllers/authController.js'
 import { followUser,removeFollower,getAllnotification, getUser, unfollowUser, getallfriends, updateUser, deleteUser, likePost,getAllUsers, addProfilepPic, getAllUsersWithOutFollowing } from '../controllers/userControllers.js';
 
@@ -28,6 +28,7 @@ router.post('/add-post', upload.single("file"), addPost)
 router.post('/forgot-password', forgotPassword)
 router.post('/verify-email', verifyEmail)
 router.post('/posts/:postId/comment',verifyToken, commentPost)
+router.post('/report-post/:postId',verifyToken, reportPost)
     
 router.put('/reset-password', resetPassword)
 router.put('/edit-profile', verifyToken, updateUser)         

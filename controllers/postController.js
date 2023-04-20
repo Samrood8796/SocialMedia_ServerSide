@@ -2,6 +2,7 @@ import cloudinary from "../config/cloudinary.js"
 import Notification from "../models/Notification.js"
 import Post from "../models/Post.js"
 import User from "../models/User.js"
+import Report from "../models/ReportPost.js"
 
 export const updatePost = async (req, res) => {
     try {
@@ -19,6 +20,7 @@ export const updatePost = async (req, res) => {
         return res.status(500).json('internal error occured')
     }
 }
+
 
 //add post
 export const addPost = async (req, res) => {
@@ -149,5 +151,26 @@ export const deletePost = async (req, res) => {
     } catch (err) {
         console.log(err);
         return res.status(500).json("internal server error")
+    }
+}
+export const reportPost = async (req, res) => {
+    try {
+        const { id, userName } = req.user
+        const { postId } = req.params
+        const { content } = req.body
+        console.log("id,postId,content");
+        console.log(id,postId,content);
+        let post = await Post.findById(postId)
+        if (!post) return res.status(400).json({ msg: 'post not found' })
+        const report = new Report({
+            reporter:id,
+            reason:content,
+            postId:postId
+        }) 
+        await report.save()
+        return res.status(200).json("report added successfully")
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json('internal error occured')
     }
 }
