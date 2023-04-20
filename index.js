@@ -20,7 +20,7 @@ const io = new Server(httpServer, {
     cors: {
         origin: 'https://main.d30vnh38wloxsg.amplifyapp.com'
     }
-});
+}); 
 
 connect(process.env.MONGO_URL).then(() => {
     console.log("mongoose connected",);
