@@ -18,7 +18,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: 'http://localhost:3000'
+        origin: 'https://main.d30vnh38wloxsg.amplifyapp.com'
     }
 });
 
@@ -38,12 +38,12 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use('/api', userRoute)
 app.use('/api/admin', adminRoute)
 app.use('/api/chats', chatRoute)
-app.use('/api/messages', messageRoute)
+app.use('/api/messages', messageRoute) 
 
 httpServer.listen(3001, () => {
     console.log('server running succesfully');
 }) 
-
+ 
 let users = []
 const addUser = (userId,socketId) =>{
    !users.some(user=>user.userId === userId) && users.push({userId, socketId})
@@ -56,7 +56,7 @@ const getUser = (userId)=>{
         return user.userId == userId})
 }
 io.on('connection',(socket)=>{
-    console.log('connected');
+    console.log('socket connected');
     socket.on('addUser',(userId)=>{
         addUser(userId,socket.id)
     })
@@ -69,7 +69,7 @@ io.on('connection',(socket)=>{
     
     //disconnect 
     socket.on('disconnect',()=>{ 
-        console.log('disconnected')
+        console.log('socket disconnected')
         removeUser(socket.id)
     })
 })

@@ -45,7 +45,7 @@ export const register = async (req, res) => {
         })
 
         return res.status(200).json({
-            status: "pending",
+            status: "pending",  
             message: "Please check your email",
             user: user._id,
         })
@@ -142,7 +142,7 @@ export const forgotPassword = async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        return res.status(500).json('internal error')
+        return res.status(500).json({msg:'internal error'})
     }
 }
 
