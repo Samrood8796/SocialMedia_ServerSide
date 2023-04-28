@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Post from '../models/Post.js'
 const ObjectId = mongoose.Types.ObjectId;
 import User from "../models/User.js";
+import Report from '../models/ReportPost.js';
 
 const adminUsername = process.env.ADMIN_USERNAME
 const adminPassword = process.env.ADMIN_PASSWORD;
@@ -34,13 +35,13 @@ export const blockuser = (req, res) => {
         const { id } = req.params;
         const checked = req.body.checked;
         if (checked) {
-            User.findByIdAndUpdate({ _id: id }, { $set: { isBlocked: false } },{new:true}).then((response) => {
+            User.findByIdAndUpdate({ _id: id }, { $set: { isBlocked: false } }, { new: true }).then((response) => {
                 console.log("response");
                 console.log(response);
                 return res.status(200).json({ isBlocked: false })
             })
         } else {
-            User.findByIdAndUpdate({ _id: id }, { $set: { isBlocked: true } },{new:true}).then((response) => {
+            User.findByIdAndUpdate({ _id: id }, { $set: { isBlocked: true } }, { new: true }).then((response) => {
                 console.log("response else");
                 console.log(response);
                 return res.status(200).json({ isBlocked: true })
@@ -48,7 +49,25 @@ export const blockuser = (req, res) => {
         }
     } catch (err) {
         console.log(err);
-        res.status(500).json({ message: err.message }) 
+        res.status(500).json({ message: err.message })
+    }
+}
+
+//reported posts
+export const getallReportPosts = async (req,res) => {
+    try {
+
+        const reportedPost = await Report.find().populate('postId reporter').populate(
+            { path: 'reporter', select: 'userName profilePic' }
+        ).sort({ createdAt: -1 })
+            .exec();
+
+        console.log(reportedPost);
+        if (!reportedPost) return res.status(200).json("no reports found")
+        res.status(200).json(reportedPost)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: err.message })
     }
 }
 
@@ -57,9 +76,9 @@ export const blockuser = (req, res) => {
 export const searchUser = async (req, res) => {
     console.log("call on server side");
     const { key } = req.params
-    try {   
+    try {
         const users = await User.find({
-            "$or": [
+            "$or": [ 
                 {
                     userName: { $regex: key }
                 },
@@ -86,8 +105,8 @@ export const getallPosts = async (req, res) => {
                 options: { sort: { createdAt: -1 } }
             })
             .sort({ createdAt: -1 })
-            .exec();    
-            console.log(allPosts);
+            .exec();
+        console.log(allPosts);
         res.status(200).json(allPosts)
     } catch (err) {
         res.status(404).json({ message: err.message })
@@ -122,20 +141,20 @@ export const deletePost = async (req, res) => {
         const { id } = req.params;
         console.log(id, "this is id");
         console.log(new ObjectId(id));
-        const response = await Post.updateOne({ _id: new ObjectId(id) }, { isDeleted: true} );
+        const response = await Post.updateOne({ _id: new ObjectId(id) }, { isDeleted: true });
         console.log(response, "this is updated post");
 
         res.status(200).json({ message: "Post deleted successfully." });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: err.message }); 
+        res.status(500).json({ message: err.message });
     }
 };
 
 /*GET DASHBOARDCOUNTS*/
 
 export const getDashboardCount = async (req, res) => {
-    try { 
+    try {
         const userCount = await User.countDocuments()
         const postCount = await Post.countDocuments()
 
@@ -245,3 +264,4 @@ function getMonthsInRange(startDate, endDate) {
     }
     return months;
 }
+
