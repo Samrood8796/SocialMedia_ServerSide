@@ -37,11 +37,18 @@ export const register = async (req, res) => {
         })
         await verificationToken.save()
         // sending otp to user mail
-        transport.sendMail({
-            from: "socialmedia@gmail.com",
+        let details = {
+            from: process.env.user,
             to: user.email,
             subject: "verify your email using otp",
             html: `<h1>Your Otp Code ${otp}</h1>`
+        }
+        transport.sendMail(details,(err)=>{
+            if(err){
+                console.log("error occured.............");
+                console.log(err);
+            }else
+            console.log('success..........');
         })
 
         return res.status(200).json({
@@ -106,7 +113,7 @@ export const verifyEmail = async (req, res) => {
         const { password, ...user } = mainuser._doc
 
         transport.sendMail({
-            from: "socialmedia@gmail.com",
+            from: process.env.user,
             to: user.email,
             subject: "Successfully verified email",
             html: `<h1>now you can login</h1>`
@@ -132,9 +139,9 @@ export const forgotPassword = async (req, res) => {
         })
         await resetToken.save()
         transport.sendMail({
-            from: "sender@server.com",
+            from: process.env.user,
             to: user.email,
-            subject: "reset token",
+            subject: "Reset token",
             html: `
         <a href="http://localhost:3000/resetPassword?token=${randomText}&userId=${userId}">password reset link</a>`
         })
@@ -167,9 +174,9 @@ export const resetPassword = async (req, res) => {
         await user.save()
 
         transport.sendMail({
-            from: "sender@server.com",
+            from: process.env.user,
             to: user.email,
-            subject: "your password reset successfull",
+            subject: "Your password reset successfull",
             html: `now you can login`
         })
         return res.status(200).json({ msg: 'you can login now' })
