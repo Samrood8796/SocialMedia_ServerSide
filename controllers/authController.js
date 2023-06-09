@@ -128,18 +128,20 @@ export const verifyEmail = async (req, res) => {
 //forgot password
 export const forgotPassword = async (req, res) => {
     try {
+        console.log("first")
         const { email } = req.body
         let user = await User.findOne({ email: email })
         if (!user) return res.status(400).json({ msg: 'acccount not found' })
         let userId = user._id
         const randomText = crypto.randomBytes(20).toString('hex')
         const resetToken = new ResetToken({
-            user: user._id,
+            user: user._id, 
             token: randomText
         })
         await resetToken.save()
         console.log("process.env.USER======")
         console.log(process.env.USER)
+        console.log("=================")
         transport.sendMail({
             from: process.env.USER,
             to: user.email,

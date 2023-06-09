@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer'
+console.log("USER====");
+console.log(process.env.USER);
+console.log("USER====");
 const transport = nodemailer.createTransport({
     service:"gmail",
     auth: {
