@@ -38,7 +38,7 @@ export const register = async (req, res) => {
         await verificationToken.save()
         // sending otp to user mail
         let details = {
-            from: process.env.user,
+            from: process.env.USER,
             to: user.email,
             subject: "verify your email using otp",
             html: `<h1>Your Otp Code ${otp}</h1>`
@@ -113,7 +113,7 @@ export const verifyEmail = async (req, res) => {
         const { password, ...user } = mainuser._doc
 
         transport.sendMail({
-            from: process.env.user,
+            from: process.env.USER,
             to: user.email,
             subject: "Successfully verified email",
             html: `<h1>now you can login</h1>`
@@ -138,8 +138,10 @@ export const forgotPassword = async (req, res) => {
             token: randomText
         })
         await resetToken.save()
+        console.log("process.env.USER======")
+        console.log(process.env.USER)
         transport.sendMail({
-            from: process.env.user,
+            from: process.env.USER,
             to: user.email,
             subject: "Reset token",
             html: `
@@ -174,7 +176,7 @@ export const resetPassword = async (req, res) => {
         await user.save()
 
         transport.sendMail({
-            from: process.env.user,
+            from: process.env.USER,
             to: user.email,
             subject: "Your password reset successfull",
             html: `now you can login`
