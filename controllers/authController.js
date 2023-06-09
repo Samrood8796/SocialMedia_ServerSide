@@ -38,14 +38,13 @@ export const register = async (req, res) => {
         await verificationToken.save()
         // sending otp to user mail
         let details = {
-            from: process.env.USER,
+            from: process.env.USER_EMAIL,
             to: user.email,
             subject: "verify your email using otp",
             html: `<h1>Your Otp Code ${otp}</h1>`
         }
         transport.sendMail(details,(err)=>{
             if(err){
-                console.log("error occured.............");
                 console.log(err);
             }else
             console.log('success..........');
@@ -105,7 +104,6 @@ export const verifyEmail = async (req, res) => {
 
         await VerificationToken.findByIdAndDelete(token._id)
         await mainuser.save()
-        console.log(mainuser, "ggggggggggggg")
         const accessToken = Jwt.sign({
             id: userId,
             userName: mainuser.userName
@@ -113,7 +111,7 @@ export const verifyEmail = async (req, res) => {
         const { password, ...user } = mainuser._doc
 
         transport.sendMail({
-            from: process.env.USER,
+            from: process.env.USER_EMAIL,
             to: user.email,
             subject: "Successfully verified email",
             html: `<h1>now you can login</h1>`
@@ -128,7 +126,6 @@ export const verifyEmail = async (req, res) => {
 //forgot password
 export const forgotPassword = async (req, res) => {
     try {
-        console.log("first")
         const { email } = req.body
         let user = await User.findOne({ email: email })
         if (!user) return res.status(400).json({ msg: 'acccount not found' })
@@ -139,11 +136,8 @@ export const forgotPassword = async (req, res) => {
             token: randomText
         })
         await resetToken.save()
-        console.log("process.env.USER======")
-        console.log(process.env.USER)
-        console.log("=================")
         transport.sendMail({
-            from: process.env.USER,
+            from: process.env.USER_EMAIL,
             to: user.email,
             subject: "Reset token",
             html: `
@@ -178,7 +172,7 @@ export const resetPassword = async (req, res) => {
         await user.save()
 
         transport.sendMail({
-            from: process.env.USER,
+            from: process.env.USER_EMAIL,
             to: user.email,
             subject: "Your password reset successfull",
             html: `now you can login`
