@@ -141,7 +141,7 @@ export const forgotPassword = async (req, res) => {
             to: user.email,
             subject: "Reset token",
             html: `
-        <a href="http://localhost:3000/resetPassword?token=${randomText}&userId=${userId}">password reset link</a>`
+        <a href="https://main.d30vnh38wloxsg.amplifyapp.com/resetPassword?token=${randomText}&userId=${userId}">password reset link</a>`
         })
         return res.status(200).json({ msg: 'check your email to reset password' })
 
