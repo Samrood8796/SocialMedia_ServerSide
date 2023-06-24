@@ -19,9 +19,9 @@ export const getMessages = async (req, res) => {
     try {
         const { chatId } = req.params
         const messages = await Message.find({ chatId })
-        res.status(200).json(messages)
+        res.status(200).json(messages) 
     } catch (err) {
         console.log(err)
         res.status(500).json('internal error')
-    } 
-}
+    }  
+} 

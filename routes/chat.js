@@ -6,4 +6,4 @@ router.post('/',createChat)
 router.get('/:userId',findUserChats)
 router.get('/:firstId/:secondId',findChat)
  
-export default router;
+export default router; 
