@@ -22,21 +22,13 @@ export const findUserChats = async (req, res) => {
     console.log("finduserchat called");
     const { userId } = req.params
     try {
-        const chat = await Chat.aggregate([
-            { $match: { members: { $in: [userId] } } },
-            { $lookup: { from: 'messages', localField: '_id', foreignField: 'chatId', as: 'messages' } },
-            { $unwind: '$messages' },
-            { $sort: { 'messages.createdAt': -1 } },
-            { $group: { _id: '$_id', members: { $first: '$members' }, lastMessage: { $first: '$messages' } } },
-            { $sort: { 'lastMessage.createdAt': -1 } },
-            { $project: { _id: 1, members: 1 } },
-        ]);
+        const chat = await Chat.find({ members: { $in: [userId] } })
         return res.status(200).json(chat)
     } catch (err) {
         console.log(err)
         return res.status(400).json('internal error ')
     }
-}
+} 
 
 export const findChat = async (req, res) => {
     const { firstId, secondId } = req.params
