@@ -92,9 +92,23 @@ export const updateUser = async (req, res) => {
 export const addProfilepPic = async (req, res) => {
     try {
         const { userId } = req.body
+        const user = await User.findById(userId)
+        if (user && user.profilePic) {
+            cloudinary.uploader.destroy(user.profilePic_PublicId, (error, result) => {
+                if (error) {
+                    return res.status(400).json("profilepic not updated try later..")
+                }
+            });
+        }
         let result = await cloudinary.uploader.upload(req.file.path)
+        const { secure_url, public_id } = result;
         let updatedUser = await User.findByIdAndUpdate(userId,
-            { $set: { profilePic: result.secure_url } }, { new: true })
+            {
+                $set: {
+                    profilePic: secure_url,
+                    profilePic_PublicId: public_id
+                }
+            }, { new: true })
         res.status(200).json(updatedUser)
     } catch (err) {
         console.log(err);
@@ -133,7 +147,7 @@ export const getUser = async (req, res) => {
 
 
 // get all users without following
-export const getAllUsersWithOutFollowing = async (req, res) => { 
+export const getAllUsersWithOutFollowing = async (req, res) => {
     try {
         const { id, userName } = req.user
         const user = await User.findById(id)
@@ -151,12 +165,12 @@ export const getAllUsersWithOutFollowing = async (req, res) => {
     }
 }
 // get all users
-export const getAllUsers = async (req, res) => { 
+export const getAllUsers = async (req, res) => {
     try {
         const { id, userName } = req.user
         const allusers = await User.find().select('userName profilePic name')
-        
-            return res.status(200).json({ data: allusers })
+
+        return res.status(200).json({ data: allusers })
     } catch (err) {
         console.log(err);
         return res.status(500).json('internal error occured')
@@ -167,7 +181,7 @@ export const deleteUser = async (req, res) => {
     try {
         if (req.params.id !== req.user.id) {
             return res.status(400).json("user dosn't match")
-        } 
+        }
         await User.findByIdAndDelete(req.params.id)
         return res.status(200).json('deleted account successfully')
     } catch (err) {
@@ -190,18 +204,18 @@ export const likePost = async (req, res) => {
         } else {
             post.likes.set(id, true)
 
-           const check =  post.author != id
-           console.log(check);
-           if(check){
-            const notification = new Notification({
-                type: 'like',
-                user: post.author,
-                friend: id,
-                content: 'liked your post',
-                postId: postId,
-            })
-            await notification.save()
-        }
+            const check = post.author != id
+            console.log(check);
+            if (check) {
+                const notification = new Notification({
+                    type: 'like',
+                    user: post.author,
+                    friend: id,
+                    content: 'liked your post',
+                    postId: postId,
+                })
+                await notification.save()
+            }
         }
         await post.save()
         const updatedPost = await Post.findById(postId).populate('author comments.author')
@@ -233,7 +247,7 @@ export const removeFollower = async (req, res) => {
             if (index > -1) {
                 user.followers.splice(index, 1);
             }
-            await user.save()   
+            await user.save()
         }
         const updateduser = await User.findById(id)
         console.log(updateduser);
@@ -246,11 +260,11 @@ export const removeFollower = async (req, res) => {
 
 export const getAllnotification = async (req, res) => {
     try {
-        const { id } = req.user 
+        const { id } = req.user
         const notification = await Notification.find({ user: id }).populate('friend postId').sort({ createdAt: -1 })
         if (notification) {
             console.log(notification);
-           return res.status(200).json(notification)
+            return res.status(200).json(notification)
         }
     } catch (err) {
         return res.status(200).json('internal error')

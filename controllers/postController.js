@@ -26,15 +26,14 @@ export const updatePost = async (req, res) => {
 export const addPost = async (req, res) => {
     try {
         let { userId, desc } = req.body
-        let image = ""
-        let result;
         if (req.file) {
-            result = await cloudinary.uploader.upload(req.file.path)
-            image = result.secure_url
+            var result = await cloudinary.uploader.upload(req.file.path)
+            var { secure_url, public_id } = result
         }
         let newPost = new Post({
             desc: desc,
-            image: image,
+            image: secure_url,
+            imagePublicId: public_id,
             author: userId
         })
         const post = await newPost.save()
@@ -70,10 +69,10 @@ export const fetchPostFollowing = async (req, res) => {
         if (!user) return res.status(400).json('user not found')
         const posts = await Promise.all(
             user.followings.map((item) => {
-                return Post.find({ author: item ,isDeleted:false}).populate('author').populate('comments.author').sort({ createdAt: -1 })
+                return Post.find({ author: item, isDeleted: false }).populate('author').populate('comments.author').sort({ createdAt: -1 })
             }))
         const flattenPost = posts.flat()
-        const userPost = await Post.find({ author: id, isDeleted:false }).populate("author").populate('comments.author').sort({ createdAt: -1 })
+        const userPost = await Post.find({ author: id, isDeleted: false }).populate("author").populate('comments.author').sort({ createdAt: -1 })
         const combinedPost = userPost.concat(flattenPost)
         return res.status(200).json(combinedPost)
     } catch (err) {
@@ -86,7 +85,7 @@ export const fetchAllPosts = async (req, res) => {
         const { id } = req.user
         const user = await User.findById(id)
         if (!user) return res.status(400).json('user not found')
-        const posts = await Post.find({isDeleted:false}).populate('author').populate('comments.author userName profilePc')
+        const posts = await Post.find({ isDeleted: false }).populate('author').populate('comments.author userName profilePc')
         return res.status(200).json(posts)
     } catch (err) {
         console.log(err);
@@ -142,12 +141,21 @@ export const commentPost = async (req, res) => {
 export const deletePost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id)
-        if (post) {
-            await Post.findByIdAndDelete(req.params.id)
-            return res.status(200).json({ id: req.params.id })
-        } else {
+        if (!post) {
             return res.status(400).json('you are not allowed to delete this post')
         }
+        const { imagePublicId } = post
+        //deleting from cloudinary
+        cloudinary.uploader.destroy(imagePublicId, (error, result) => {
+            if (error) {
+                console.log('Error deleting image:', error);
+            } else {
+                console.log('Image deleted successfully');
+            }
+        });
+        await Post.findByIdAndDelete(req.params.id)
+        return res.status(200).json({ id: req.params.id })
+
     } catch (err) {
         console.log(err);
         return res.status(500).json("internal server error")
@@ -159,14 +167,14 @@ export const reportPost = async (req, res) => {
         const { postId } = req.params
         const { content } = req.body
         console.log("id,postId,content");
-        console.log(id,postId,content);
+        console.log(id, postId, content);
         let post = await Post.findById(postId)
         if (!post) return res.status(400).json({ msg: 'post not found' })
         const report = new Report({
-            reporter:id,
-            reason:content,
-            postId:postId
-        }) 
+            reporter: id,
+            reason: content,
+            postId: postId
+        })
         await report.save()
         return res.status(200).json("report added successfully")
     } catch (err) {

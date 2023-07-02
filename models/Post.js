@@ -14,6 +14,10 @@ const postSchema = Schema({
         type: String,
         required: false
     },
+    imagePublicId: {
+        type: String,
+        required: false
+    },
     likes: {
         type: Map,
         of: Boolean,

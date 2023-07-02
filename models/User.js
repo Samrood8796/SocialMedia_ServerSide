@@ -26,13 +26,17 @@ const userSchema = Schema({
     },
     password: {
         type: String,
-        // required: true
     },
     phoneNumber: {
         type: Number,
     },
     profilePic: {
-        type: String
+        type: String,
+        required:false
+    },
+    profilePic_PublicId: {
+        type: String,
+        required:false
     },
     followings: [
         {
